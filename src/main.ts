@@ -65,7 +65,7 @@ const getEarliestSunrise = async (requestUrlBatches: string[][]) => {
                         earliestSunriseData.sunrise = response.data.results.sunrise;
                         earliestSunriseData.dayLength = response.data.results['day_length'];
                     }
-                    else if (Date.parse(response.data.results.sunrise) < Date.parse(earliestSunriseData.sunrise)) {
+                    else if (Date.parse(response.data.results.sunrise) < Date.parse(earliestSunriseData.sunrise) && response.data.results['day_length'] != 0) {
                         earliestSunriseData.sunrise = response.data.results.sunrise;
                         earliestSunriseData.dayLength = response.data.results['day_length'];
                     }

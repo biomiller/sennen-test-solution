@@ -14,6 +14,7 @@ describe("GET /getEarliestSunrise", () => {
                 response.body.should.be.a('object');
                 response.body["earliestSunrise"].should.be.a('string');
                 response.body["dayLength"].should.be.a('string');
+                response.body["dayLength"].should.not.equal('00h:00min:00sec');
                 done();
             });
     });

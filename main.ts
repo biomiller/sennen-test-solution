@@ -16,11 +16,12 @@ interface sunriseData {
     dayLength?: number
 }
 
-app.get("/getSunriseData", async (request, resolve) => {
+app.get("/getSunriseData", async (request, resolve, next) => {
+
     const coordinatesList: string[] = generateRandomLatLongs(10);
-    
+
     let requestURLs: any = [];
-    
+
     for (const coordinates of coordinatesList) {
         const coordinatesArray = coordinates.split(", ");
         let url = `${sunriseAPI}?lat=${coordinatesArray[0]}&lng=${coordinatesArray[1]}&date=today&formatted=0`;
@@ -29,16 +30,34 @@ app.get("/getSunriseData", async (request, resolve) => {
 
     requestURLs = _.chunk(requestURLs, 5);
 
-    let earliestSunriseData: sunriseData = {};
+    try {
+        const earliestSunrise = await getEarliestSunrise(requestURLs);
+        resolve.send(earliestSunrise);
+    } catch (error) {
+        next(error);
+    }
+})
 
-    for (const array of requestURLs) {
-        console.log(array);
+const generateRandomLatLongs = (number: number) => {
+    const coordinatesList: string[] = [];
+    while (coordinatesList.length < number) {
+        coordinatesList.push(randomCoordinates());
+    }
+    return coordinatesList;
+}
+
+const getEarliestSunrise = async (requestUrlBatches: string[][]) => {
+    let earliestSunriseData: sunriseData = {};
+    let response: string;
+
+    for (const batch of requestUrlBatches) {
+        console.log(batch);
         await axios.all([
-            axios.get(`${array[0]}`),
-            axios.get(`${array[1]}`),
-            axios.get(`${array[2]}`),
-            axios.get(`${array[3]}`),
-            axios.get(`${array[4]}`),
+            axios.get(`${batch[0]}`),
+            axios.get(`${batch[1]}`),
+            axios.get(`${batch[2]}`),
+            axios.get(`${batch[3]}`),
+            axios.get(`${batch[4]}`),
         ]
         ).then(
             axios.spread((...responses: any[]) => {
@@ -55,18 +74,15 @@ app.get("/getSunriseData", async (request, resolve) => {
                 }
             })
         ).catch((error) => {
-            console.log(error);
+            throw new Error(error);
         }
         )
     }
 
-    resolve.send(`Earliest sunrise is ${moment(earliestSunriseData.sunrise).format('hh:mm:ss')} with day length ${moment.utc(earliestSunriseData.dayLength as number * 1000).format('HH:mm:ss')}`);
-})
+    const forattedSunrise = moment(earliestSunriseData.sunrise).utc().format('HH:mm:ss');
+    const formattedDayLength = moment(earliestSunriseData.dayLength as number * 1000).utc().format('HH[h]:mm[min]:ss[sec]');
 
-const generateRandomLatLongs = (number: number) => {
-    const coordinatesList: string[] = [];
-    while (coordinatesList.length < number) {
-        coordinatesList.push(randomCoordinates());
-    }
-    return coordinatesList;
+    response = `Earliest sunrise is ${forattedSunrise} with day length ${formattedDayLength}`;
+
+    return (response);
 }

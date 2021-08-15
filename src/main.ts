@@ -18,7 +18,7 @@ interface sunriseData {
 
 app.get("/getEarliestSunrise", async (request, resolve, next) => {
 
-    const coordinatesList: string[] = generateRandomLatLongs(10);
+    const coordinatesList: string[] = generateRandomLatLongs(100);
 
     let requestURLs: any = [];
 
@@ -81,7 +81,12 @@ const getEarliestSunrise = async (requestUrlBatches: string[][]) => {
     const forattedSunrise = moment(earliestSunriseData.sunrise).utc().format('HH:mm:ss');
     const formattedDayLength = moment(earliestSunriseData.dayLength as number * 1000).utc().format('HH[h]:mm[min]:ss[sec]');
 
-    const result = `Earliest sunrise is ${forattedSunrise} with day length ${formattedDayLength}`;
+    const result = {
+        earliestSunrise: forattedSunrise,
+        dayLength: formattedDayLength
+    };
 
     return (result);
 }
+
+export default app;

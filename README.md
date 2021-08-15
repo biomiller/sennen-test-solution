@@ -5,6 +5,9 @@ A simple express api that retrieves sunset/sunrise data for 100 random latitudes
 ## Install
 `npm run install`
 
+## Test
+`npm run test`
+
 ## Build and Start
 `npm run start`
 
